@@ -114,7 +114,7 @@ def get_all_links_books_categories(categories: list):
         list: A list of tuples, each containing a category name and a list of book links.
     """
     links_books_categories = []
-    for category in categories[:3]:
+    for category in categories:
         category_name = category[0]
         category_link = category[1]
         links_books = get_all_links_books_for_one_category(category_link, category_name)
