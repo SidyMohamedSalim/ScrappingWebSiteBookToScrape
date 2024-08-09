@@ -23,14 +23,14 @@ def get_categories():
         href: str = categorie.get("href")
         link = f"{constants.BASE_URL}/{href}"
         categories.append((value, link))
-
+    categories = [categorie for categorie in categories if str(categorie[0]).lower() != "books" ]
     return categories
 
 
-def get_books_page_categorie(url_categorie, page_number=1):
+def get_books_page_categorie(url_categorie, categorie_name, page_number=1):
     retry = 0
     max_retry = 3
-    print(f"fetching page {page_number} ...")
+    print(f"fetching {categorie_name} page {page_number} ...")
 
     books_categorie_page = []
 
@@ -43,7 +43,7 @@ def get_books_page_categorie(url_categorie, page_number=1):
     books_section = soul.find("ol")
     if not books_section and retry > max_retry:
         retry += 1
-        get_books_page_categorie(url_categorie)
+        get_books_page_categorie(url_categorie,categorie_name=categorie_name)
 
     if books_section:
         songs_article = books_section.find_all("article")
@@ -57,11 +57,11 @@ def get_books_page_categorie(url_categorie, page_number=1):
     return books_categorie_page
 
 
-def get_all_links_books_categorie(url_categorie):
+def get_all_links_books_for_one_categorie(url_categorie, categorie_name):
     all_links_books_categorie = []
     page_number = 1
     while True:
-        books_categorie_page = get_books_page_categorie(url_categorie, page_number)
+        books_categorie_page = get_books_page_categorie(url_categorie ,categorie_name ,page_number)
         if not books_categorie_page:
             break
         all_links_books_categorie.extend(books_categorie_page)
@@ -70,11 +70,22 @@ def get_all_links_books_categorie(url_categorie):
     return all_links_books_categorie
 
 
+def get_all_links_books_categories(categories:list):
+    links_books_categories = []
+    for categorie in categories[:3]:
+        categorie_name = categorie[0]
+        categorie_link = categorie[1]
+        links_books = get_all_links_books_for_one_categorie(categorie_link,categorie_name)
+        links_books_categories.append((categorie_name,links_books))
+
+    return links_books_categories
+
+
 
 def main():
-    # get_categories()
-    a = get_all_links_books_categorie("https://books.toscrape.com/catalogue/category/books/fiction_10/index.html")
-    pprint(a)
+    categories = get_categories()
+    links_books_categories = get_all_links_books_categories(categories)
+    pprint(links_books_categories)
 
 
 if __name__ == "__main__":
